@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Engineering Workbench</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/three.min.js"></script>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Top Navigation Bar -->
+        <header id="main-header">
+            <div class="header-left">
+                <div class="logo-icon">⚙️</div>
+                <div class="title-group">
+                    <h1>Unified Engineering Workbench</h1>
+                    <span class="subtitle">C++17 High-Performance Engineering System</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <nav id="view-nav">
+                    <button id="nav-btn-geometry" class="nav-btn active" data-view="view-geometry">Geometry</button>
+                    <button id="nav-btn-thermal" class="nav-btn" data-view="view-thermal">Thermal Analysis</button>
+                    <button id="nav-btn-performance" class="nav-btn" data-view="view-performance">Performance</button>
+                    <button id="nav-btn-hardware" class="nav-btn" data-view="view-hardware">Hardware</button>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div id="ready-badge" class="status-badge pulse-green">
+                    <span class="badge-dot"></span>
+                    <span id="ready-time-label">Ready: &lt; 25 ms</span>
+                </div>
+                <div class="status-badge offline-badge">
+                    <span>100% Offline Mode</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="content-area">
+
+            <!-- ========================================================= -->
+            <!-- VIEW 1: GEOMETRY (ASCII STL Viewer) -->
+            <!-- ========================================================= -->
+            <section id="view-geometry" class="app-view active">
+                <div class="view-grid">
+                    <div class="sidebar-panel">
+                        <h2>CAD Geometry Import</h2>
+                        <p class="description">Parse and inspect 3D ASCII STL geometry files with full C++ validation.</p>
+
+                        <div class="control-card">
+                            <label for="stl-file-input">Select ASCII STL File:</label>
+                            <input type="file" id="stl-file-input" accept=".stl" class="file-input">
+                            <button id="btn-load-sample-stl" class="btn btn-secondary">Load Sample Rod STL</button>
+                        </div>
+
+                        <!-- Actionable Error Alert Box -->
+                        <div id="stl-alert-box" class="alert-box hidden">
+                            <div class="alert-icon">⚠️</div>
+                            <div class="alert-content">
+                                <strong id="stl-alert-title">Validation Notice</strong>
+                                <p id="stl-alert-message"></p>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h3>Geometry Metrics</h3>
+                            <div class="stat-row"><span>Solid Name:</span> <strong id="stl-solid-name">-</strong></div>
+                            <div class="stat-row"><span>Triangles:</span> <strong id="stl-triangle-count">-</strong></div>
+                            <div class="stat-row"><span>Bounding Box X:</span> <strong id="stl-bbox-x">-</strong></div>
+                            <div class="stat-row"><span>Bounding Box Y:</span> <strong id="stl-bbox-y">-</strong></div>
+                            <div class="stat-row"><span>Bounding Box Z:</span> <strong id="stl-bbox-z">-</strong></div>
+                        </div>
+
+                        <div class="controls-hint">
+                            <strong>3D View Controls:</strong>
+                            <ul>
+                                <li>Rotate: Left-Click + Drag</li>
+                                <li>Pan: Right-Click + Drag</li>
+                                <li>Zoom: Mouse Wheel Scroll</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="viewport-panel">
+                        <div class="viewport-toolbar">
+                            <span class="toolbar-title">ASCII STL 3D Mesh Viewer</span>
+                            <button id="btn-stl-reset-view" class="btn btn-sm">Reset View / Fit</button>
+                        </div>
+                        <div id="stl-canvas-container" class="canvas-3d-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- VIEW 2: THERMAL ANALYSIS (1D FEA & ANSYS CSV) -->
+            <!-- ========================================================= -->
+            <section id="view-thermal" class="app-view">
+                <div class="view-tabs">
+                    <button id="tab-btn-fea" class="tab-btn active" data-subview="subview-fea">1D Mechanical Thermal FEA Solver</button>
+                    <button id="tab-btn-ansys" class="tab-btn" data-subview="subview-ansys">ANSYS Nodal 3D Point Cloud</button>
+                </div>
+
+                <!-- Subview A: 1D Thermal FEA Solver -->
+                <div id="subview-fea" class="subview active">
+                    <div class="fea-grid">
+                        <div class="sidebar-panel">
+                            <h2>1D Rod FEA Parameters</h2>
+                            <p class="description">Governing equation: -d/dx(kA dT/dx) = qA with Dirichlet BCs.</p>
+
+                            <div class="param-grid">
+                                <div class="form-group">
+                                    <label for="fea-param-L">Length L (m):</label>
+                                    <input type="number" id="fea-param-L" value="1.0" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fea-param-A">Area A (m²):</label>
+                                    <input type="number" id="fea-param-A" value="0.0001" step="0.00001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fea-param-k">Conductivity k (W/m·K):</label>
+                                    <input type="number" id="fea-param-k" value="10.0" step="1.0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fea-param-q">Heat Gen q (W/m³):</label>
+                                    <input type="number" id="fea-param-q" value="10000" step="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fea-param-T0">T(0) (°C):</label>
+                                    <input type="number" id="fea-param-T0" value="100.0" step="5.0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fea-param-TL">T(L) (°C):</label>
+                                    <input type="number" id="fea-param-TL" value="20.0" step="5.0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fea-param-N">Elements N:</label>
+                                    <select id="fea-param-N">
+                                        <option value="10" selected>N = 10</option>
+                                        <option value="20">N = 20</option>
+                                        <option value="40">N = 40</option>
+                                        <option value="80">N = 80</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="btn-group-vertical">
+                                <button id="btn-fea-solve" class="btn btn-primary">Solve FEA System</button>
+                                <button id="btn-fea-convergence" class="btn btn-secondary">Run Convergence (N=10, 20, 40, 80)</button>
+                                <button id="btn-fea-export-csv" class="btn btn-outline">Export Results to CSV</button>
+                            </div>
+
+                            <div id="fea-alert-box" class="alert-box hidden">
+                                <div class="alert-icon">⚠️</div>
+                                <div class="alert-content">
+                                    <strong id="fea-alert-title">Notice</strong>
+                                    <p id="fea-alert-message"></p>
+                                </div>
+                            </div>
+
+                            <div class="stats-card">
+                                <h3>Current Solve Metrics</h3>
+                                <div class="stat-row"><span>Max Nodal Error:</span> <strong id="fea-node-err">-</strong></div>
+                                <div class="stat-row"><span>Max Midpoint Error:</span> <strong id="fea-mid-err">-</strong></div>
+                                <div class="stat-row"><span>Theoretical (q/8k)·h²:</span> <strong id="fea-theory-err">-</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="display-panel">
+                            <div class="chart-container">
+                                <h3>Temperature Profile T(x) [x in meters, T in °C]</h3>
+                                <canvas id="fea-profile-canvas" width="600" height="300"></canvas>
+                            </div>
+
+                            <div class="table-container">
+                                <h3>Mesh Convergence Table</h3>
+                                <table id="convergence-table" class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Elements (N)</th>
+                                            <th>Mesh Size h (m)</th>
+                                            <th>Max Node Err (°C)</th>
+                                            <th>Max Midpoint Err (°C)</th>
+                                            <th>Observed Order (p)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="convergence-tbody">
+                                        <tr><td colspan="5" class="text-center">Click 'Run Convergence' to compute study</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subview B: ANSYS CSV 3D Point Cloud -->
+                <div id="subview-ansys" class="subview">
+                    <div class="view-grid">
+                        <div class="sidebar-panel">
+                            <h2>ANSYS Nodal CSV</h2>
+                            <div class="synthetic-badge">SYNTHETIC DATASET (Not real ANSYS export)</div>
+                            <p class="description">Coloured 3D temperature point cloud with units (°C) and interactive node inspection.</p>
+
+                            <div class="control-card">
+                                <label for="ansys-file-input">Select ANSYS CSV File:</label>
+                                <input type="file" id="ansys-file-input" accept=".csv" class="file-input">
+                                <button id="btn-load-sample-ansys" class="btn btn-secondary">Load Synthetic ANSYS CSV</button>
+                            </div>
+
+                            <div id="ansys-alert-box" class="alert-box hidden">
+                                <div class="alert-icon">⚠️</div>
+                                <div class="alert-content">
+                                    <strong id="ansys-alert-title">Notice</strong>
+                                    <p id="ansys-alert-message"></p>
+                                </div>
+                            </div>
+
+                            <div class="stats-card">
+                                <h3>Nodal Point Cloud Metrics</h3>
+                                <div class="stat-row"><span>Total Nodes:</span> <strong id="ansys-node-count">-</strong></div>
+                                <div class="stat-row"><span>Min Temp:</span> <strong id="ansys-min-temp">-</strong></div>
+                                <div class="stat-row"><span>Max Temp:</span> <strong id="ansys-max-temp">-</strong></div>
+                                <div class="stat-row"><span>Mean Temp:</span> <strong id="ansys-mean-temp">-</strong></div>
+                            </div>
+
+                            <div class="inspection-card">
+                                <h3>Node Inspection Detail</h3>
+                                <div id="node-inspect-content">
+                                    <p class="hint">Click or hover over any node point in the 3D viewer</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="viewport-panel">
+                            <div class="viewport-toolbar">
+                                <span class="toolbar-title">3D Temperature Point Cloud (WebGL)</span>
+                                <div class="legend-bar">
+                                    <span class="legend-label">Cool (20°C)</span>
+                                    <div class="gradient-strip"></div>
+                                    <span class="legend-label">Hot (185°C)</span>
+                                </div>
+                            </div>
+                            <div id="ansys-canvas-container" class="canvas-3d-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- VIEW 3: PERFORMANCE (Multicore Execution) -->
+            <!-- ========================================================= -->
+            <section id="view-performance" class="app-view">
+                <div class="perf-grid">
+                    <div class="sidebar-panel">
+                        <h2>Multicore Workload Controller</h2>
+                        <p class="description">Bounded worker thread pool executing independent thermal solves in deterministic order.</p>
+
+                        <div class="param-grid">
+                            <div class="form-group">
+                                <label for="perf-cases-input">Total Solves:</label>
+                                <input type="number" id="perf-cases-input" value="2000" step="500">
+                            </div>
+                            <div class="form-group">
+                                <label for="perf-workers-input">Worker Threads:</label>
+                                <select id="perf-workers-input">
+                                    <option value="1">1 Worker (Serial)</option>
+                                    <option value="2">2 Workers</option>
+                                    <option value="4" selected>4 Workers</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="btn-group-horizontal">
+                            <button id="btn-perf-run" class="btn btn-primary">Run Parallel Batch</button>
+                            <button id="btn-perf-cancel" class="btn btn-danger" disabled>Cancel</button>
+                        </div>
+                        <button id="btn-perf-benchmark" class="btn btn-secondary">Run Benchmark Protocol (1, 2, 4 Workers)</button>
+
+                        <!-- Progress Bar & Status -->
+                        <div class="progress-section">
+                            <div class="progress-labels">
+                                <span id="perf-status-text">Status: Idle</span>
+                                <span id="perf-progress-percent">0%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div id="perf-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="agreement-badge">
+                            <span>Serial vs Parallel Agreement:</span>
+                            <strong id="perf-agreement-label">max |ΔT| = 0.000e+00 °C (PASS)</strong>
+                        </div>
+
+                        <div class="stats-card">
+                            <h3>Hardware Environment</h3>
+                            <div class="stat-row"><span>CPU:</span> <strong id="hw-cpu-label">-</strong></div>
+                            <div class="stat-row"><span>Cores:</span> <strong id="hw-cores-label">-</strong></div>
+                            <div class="stat-row"><span>RAM:</span> <strong id="hw-ram-label">-</strong></div>
+                            <div class="stat-row"><span>Compiler:</span> <strong id="hw-compiler-label">-</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="display-panel">
+                        <div class="chart-container">
+                            <h3>Multicore Speedup & Efficiency (5 Repetitions, Median)</h3>
+                            <canvas id="perf-chart-canvas" width="600" height="260"></canvas>
+                        </div>
+
+                        <div class="table-container">
+                            <h3>Measured Benchmark Statistics</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Workers</th>
+                                        <th>Warmup (ms)</th>
+                                        <th>Median Compute (ms)</th>
+                                        <th>Speedup (T1/Tp)</th>
+                                        <th>Efficiency (%)</th>
+                                        <th>Agreement vs Serial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="perf-benchmark-tbody">
+                                    <tr><td colspan="6" class="text-center">Run benchmark to populate real timings</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- VIEW 4: HARDWARE (Embedded System Integration) -->
+            <!-- ========================================================= -->
+            <section id="view-hardware" class="app-view">
+                <div class="hardware-container">
+                    <div class="hardware-header">
+                        <h2>Host-Connected Modular Workbench Subsystems</h2>
+                        <div class="sim-watermark">[ALL DEVICES RUNNING SIMULATED MOCKS]</div>
+                    </div>
+
+                    <div class="device-cards-grid">
+                        <!-- MCU Card -->
+                        <div class="device-card" id="card-mcu">
+                            <div class="card-top">
+                                <div class="device-icon">🎛️</div>
+                                <div>
+                                    <h3>Microcontroller (MCU)</h3>
+                                    <span class="device-chip">ARM Cortex-M4 (STM32F401)</span>
+                                </div>
+                                <span id="mcu-state-badge" class="state-badge connected">CONNECTED</span>
+                            </div>
+                            <div class="device-telemetry">
+                                <div class="telem-row"><span>Logic Domain:</span> <strong>3.3V LVCMOS</strong></div>
+                                <div class="telem-row"><span>Core Temp:</span> <strong id="mcu-temp">-</strong></div>
+                                <div class="telem-row"><span>Supply Rail:</span> <strong id="mcu-voltage">-</strong></div>
+                                <div class="telem-row"><span>Current Draw:</span> <strong id="mcu-current">-</strong></div>
+                                <div class="telem-row"><span>Heartbeat Uptime:</span> <strong id="mcu-uptime">-</strong></div>
+                            </div>
+                            <div class="status-box" id="mcu-status-box">Status: Normal telemetry</div>
+                        </div>
+
+                        <!-- FPGA Card -->
+                        <div class="device-card" id="card-fpga">
+                            <div class="card-top">
+                                <div class="device-icon">⚡</div>
+                                <div>
+                                    <h3>FPGA Accelerator</h3>
+                                    <span class="device-chip">Xilinx Artix-7 (XC7A35T)</span>
+                                </div>
+                                <span id="fpga-state-badge" class="state-badge connected">CONNECTED</span>
+                            </div>
+                            <div class="device-telemetry">
+                                <div class="telem-row"><span>Domains:</span> <strong>1.0V Core / 3.3V I/O</strong></div>
+                                <div class="telem-row"><span>Die Temp:</span> <strong id="fpga-temp">-</strong></div>
+                                <div class="telem-row"><span>VCCO Rail:</span> <strong id="fpga-voltage">-</strong></div>
+                                <div class="telem-row"><span>Current Draw:</span> <strong id="fpga-current">-</strong></div>
+                                <div class="telem-row"><span>Heartbeat Uptime:</span> <strong id="fpga-uptime">-</strong></div>
+                            </div>
+                            <div class="status-box" id="fpga-status-box">Status: Normal telemetry</div>
+                        </div>
+
+                        <!-- JTAG Debug Adapter Card -->
+                        <div class="device-card" id="card-jtag">
+                            <div class="card-top">
+                                <div class="device-icon">🔌</div>
+                                <div>
+                                    <h3>JTAG Debug Probe</h3>
+                                    <span class="device-chip">FT2232H / J-Link TAP Master</span>
+                                </div>
+                                <span id="jtag-state-badge" class="state-badge connected">CONNECTED</span>
+                            </div>
+                            <div class="device-telemetry">
+                                <div class="telem-row"><span>Debug Bus:</span> <strong>IEEE 1149.1 TAP Controller</strong></div>
+                                <div class="telem-row"><span>TCK Clock:</span> <strong>15.0 MHz (Driven)</strong></div>
+                                <div class="telem-row"><span>Sensed VREF:</span> <strong id="jtag-voltage">-</strong></div>
+                                <div class="telem-row"><span>Probe Draw:</span> <strong id="jtag-current">-</strong></div>
+                                <div class="telem-row"><span>Heartbeat Uptime:</span> <strong id="jtag-uptime">-</strong></div>
+                            </div>
+                            <div class="status-box" id="jtag-status-box">Status: Normal telemetry</div>
+                        </div>
+                    </div>
+
+                    <!-- Fault Simulation & Recovery Panel -->
+                    <div class="fault-panel">
+                        <h3>Recoverable Hardware Fault Simulation</h3>
+                        <p class="description">Demonstrates graceful failure detection (UART response timeout) and recovery via clear/retry handshake.</p>
+                        <div class="fault-controls">
+                            <button id="btn-fault-inject" class="btn btn-warning">Inject UART Timeout Fault</button>
+                            <button id="btn-fault-retry" class="btn btn-success">Clear Fault &amp; Retry</button>
+                        </div>
+                        <div id="hw-alert-box" class="alert-box hidden">
+                            <div class="alert-icon">⚠️</div>
+                            <div class="alert-content">
+                                <strong>Fault State Active</strong>
+                                <p id="hw-alert-message"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="js/app.js?v=2"></script>
+</body>
+</html>

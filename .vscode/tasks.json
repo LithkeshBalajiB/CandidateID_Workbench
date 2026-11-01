@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Workbench (Release)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build",
+                "--config",
+                "Release"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Run Unit Tests",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/workbench_tests.exe",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "Launch Workbench Server",
+            "type": "shell",
+            "command": "${workspaceFolder}/Launch.exe",
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}

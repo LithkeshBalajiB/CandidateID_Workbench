@@ -1,0 +1,138 @@
+﻿
+=========================================================
+Unified Engineering Workbench - Comprehensive Test Runner
+Executed at: 2026-10-31 20:52:22
+=========================================================
+
+[STEP 1/5] Executing Unit Test Suite (workbench_tests.exe)...
+[doctest] doctest version is "2.4.11"
+[doctest] run with "--help" for options
+===============================================================================
+[doctest] test cases:   20 |   20 passed | 0 failed | 0 skipped
+[doctest] assertions: 1500 | 1500 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[SUCCESS] All unit test cases and assertions PASSED.
+
+[STEP 2/5] Executing Task C FEA Solver and Convergence Generator...
+=========================================================
+1D Thermal FEA Benchmark & Convergence Generation Tool
+=========================================================
+
+Convergence Study Results (Uniform 1D Rod, Linear Elements):
+------------------------------------------------------------------------------------
+     N       h (m)    Max Node Err (C)  Max Midpoint Err (C)   Observed Order
+------------------------------------------------------------------------------------
+    10      0.1000          2.8422e-14              1.250000                 -
+    20      0.0500          1.9895e-13              0.312500          2.000000
+    40      0.0250          8.8107e-13              0.078125          2.000000
+    80      0.0125          1.2221e-12              0.019531          2.000000
+------------------------------------------------------------------------------------
+[SUCCESS] Wrote profiles to results/fea_profiles.csv
+[SUCCESS] Wrote convergence table to results/fea_convergence.csv
+
+[STEP 3/5] Executing Task F Backprop Gradient Check and Loss Generator...
+=========================================================
+Task F: Handwritten Backpropagation Verification Tool
+=========================================================
+
+1. INITIAL FORWARD PASS (Step 0):
+   x            = 1
+   Target y     = 2
+   Initial w    = 0.5
+   Initial b    = 0
+   Initial v    = 1
+   Initial c    = 0
+   z = w*x + b  = 0.50000000
+   h = tanh(z)  = 0.46211716
+   y_hat=v*h+c  = 0.46211716
+   error=y_hat-y= -1.53788284
+   Loss J=0.5*e^2 = 1.18254182
+
+2. GRADIENTS & FINITE-DIFFERENCE CHECK (eps = 1e-6):
+------------------------------------------------------------------------------------
+   Parameter  Analytic dJ/dTheta   Numerical (Central)     Absolute Diff     Status
+------------------------------------------------------------------------------------
+           w         -1.20946448           -1.20946448         1.130e-10PASS (<=1e-5)
+           b         -1.20946448           -1.20946448         1.130e-10PASS (<=1e-5)
+           v         -0.71068205           -0.71068205         5.254e-11PASS (<=1e-5)
+           c         -1.53788284           -1.53788284         1.118e-10PASS (<=1e-5)
+------------------------------------------------------------------------------------
+
+3. FIRST SIMULTANEOUS PARAMETER UPDATE (lr = 0.1):
+   Formula: theta_new = theta_old - lr * (dJ/dtheta)
+   w_1 = 5.000e-01 - 0.1 * (-1.209e+00) = 0.62094645
+   b_1 = 0.00000000 - 0.1 * (-1.20946448) = 0.12094645
+   v_1 = 1.00000000 - 0.1 * (-0.71068205) = 1.07106820
+   c_1 = 0.00000000 - 0.1 * (-1.53788284) = 0.15378828
+   Updated Prediction y_hat_1 = 0.82886912 (closer to target 2.0)
+   Updated Loss J_1           = 0.68577377 (decreased from 1.18254182)
+
+4. TRAINING FOR 100 SUBSEQUENT STEPS (Total 101 steps):
+   Initial Loss (Step 0)   : 1.18254182 (y_hat = 0.46211716)
+   Midway Loss (Step 50)   : 0.00000000 (y_hat = 1.99998402)
+   Final Loss (Step 100)   : 0.00000000 (y_hat = 2.00000000)
+[SUCCESS] Exported training loss history to results/backprop_loss.csv
+
+[STEP 4/5] Executing Task D Multicore Scaling Benchmark...
+=========================================================
+Task D: Multicore / Multithreaded Execution Benchmark
+=========================================================
+
+1. HARDWARE & ENVIRONMENT REPORT:
+   CPU Model         : AMD Ryzen 7 7435HS                             
+   Logical Processors: 16
+   Physical Cores    : 8
+   System RAM        : 15.69 GB
+   Compiler          : GCC 16.2.0
+   Optimization Flags: -O3 -static -static-libgcc -static-libstdc++
+
+2. WORKLOAD CONFIGURATION:
+   Independent Solves: 2000
+   Mesh Size per Rod : N = 100 elements
+   Random Seed       : 20261031
+   Conductivity (k)  : [1.00, 50.00] W/(m*K)
+   Heat Gen (q)      : [1000.00, 50000.00] W/m^3
+
+3. GENERATING BATCH WORKLOAD (Excluded from compute timing)...
+   Generated 2000 cases.
+
+4. RUNNING BENCHMARK PROTOCOL:
+   Procedure: 1 Warm-up run, 5 Measured repetitions, Median reported.
+   Exclude input generation, memory allocation, and disk I/O.
+
+----------------------------------------------------------------------------------------------------
+ Workers Warmup (ms)   Median (ms)     Speedup    Efficiency Max |T_s - T_p| (C)      Agreement
+----------------------------------------------------------------------------------------------------
+       1        6.66          7.68        1.00x         100.0%           0.000e+00   PASS (<=1e-8)
+       2        4.14          5.67        1.35x          67.7%           0.000e+00   PASS (<=1e-8)
+       4        2.59          4.38        1.75x          43.8%           0.000e+00   PASS (<=1e-8)
+----------------------------------------------------------------------------------------------------
+
+[SUCCESS] Exported raw benchmark measurements to results/performance_benchmark.csv
+
+[STEP 5/5] Executing Task B File-Size Limits Stress Test...
+=========================================================
+Task B: File-Size Limits & Parser Stress Test Harness
+=========================================================
+
+1. STRESS TESTING ANSYS CSV PARSER:
+------------------------------------------------------------------------------------
+  Node Count  File Size (MB)   Parse Time (ms) Throughput (MB/s)  Peak RSS (MB)
+------------------------------------------------------------------------------------
+       10000            0.29             31.24               9.4             5.9
+      100000            3.04            180.58              16.8            20.8
+      500000           15.63            843.13              18.5            83.2
+------------------------------------------------------------------------------------
+
+2. STRESS TESTING ASCII STL PARSER:
+------------------------------------------------------------------------------------
+   Facet Count  File Size (MB)   Parse Time (ms) Throughput (MB/s)  Peak RSS (MB)
+------------------------------------------------------------------------------------
+         10000            1.40            274.46               5.1            83.2
+         50000            7.01           1321.52               5.3            83.2
+------------------------------------------------------------------------------------
+
+=========================================================
+[COMPLETE] All verification tests executed successfully.
+Log saved to: tests/test_run.log
+=========================================================

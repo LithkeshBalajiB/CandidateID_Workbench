@@ -1,0 +1,7 @@
+# Hardware: AMD Ryzen 7 7435HS                              | 16 Logical Processors | 15.7 GB RAM
+# Compiler: GCC 16.2.0 | Flags: -O3 -static -static-libgcc -static-libstdc++
+# Workload: cases=2000, mesh_N=100, seed=20261031
+workers,warmup_ms,rep1_ms,rep2_ms,rep3_ms,rep4_ms,rep5_ms,median_ms,speedup,efficiency,max_diff_C
+1,6.6552,6.9140,7.9121,7.4863,7.7258,7.6789,7.6789,1.0000,1.0000,0.000000e+00
+2,4.1427,4.5094,5.7209,5.6456,5.9771,5.6728,5.6728,1.3536,0.6768,0.000000e+00
+4,2.5865,3.2429,4.4447,4.3847,4.5879,4.0158,4.3847,1.7513,0.4378,0.000000e+00
