@@ -1,7 +1,6 @@
 # Unified Engineering Workbench
 
 **PASS Science Works R&D Internship 2026–2027 Common Technical Assignment**  
-**Candidate ID:** [FILL: Candidate ID]  
 **Archive:** `CandidateID_Workbench.zip`  
 **Target Environment:** Windows 11 x64 (Clean Machine Compatible)  
 
